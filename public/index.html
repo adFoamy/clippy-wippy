@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>clippy wippy</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fdf8ec;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        textarea {
+            width: 100%;
+            height: 300px;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .status {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>clippy wippy</h1>
+    <textarea id="shared-text" placeholder="type or paste your text here..."></textarea>
+    <p class="status" id="status">Connecting...</p>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const textarea = document.getElementById('shared-text');
+        const statusElement = document.getElementById('status');
+
+        // When connected to the server
+        socket.on('connect', () => {
+            statusElement.textContent = 'Connected';
+            
+            // Request the current text when connecting
+            socket.emit('getText');
+        });
+
+        // When disconnected from the server
+        socket.on('disconnect', () => {
+            statusElement.textContent = 'Disconnected';
+        });
+
+        // When receiving text from the server
+        socket.on('text', (text) => {
+            if (textarea.value !== text) {
+                textarea.value = text;
+            }
+        });
+
+        // When the text changes, send it to the server
+        textarea.addEventListener('input', () => {
+            socket.emit('updateText', textarea.value);
+        });
+    </script>
+</body>
+</html>
