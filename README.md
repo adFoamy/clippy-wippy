@@ -1,6 +1,10 @@
 # clippy-wippy
 
-A simple browser-based text sharing application that allows users to share text across different devices on the same network.
+Created with AI.
+
+A simple browser-based text and file sharing application that allows users to share text and files across different devices on the same network. 
+
+Useful for times when you want to easily copy something to or from: PC, laptop, phone, tablet, or anything else with a browser.
 
 ## Features
 
