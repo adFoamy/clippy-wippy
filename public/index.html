@@ -31,30 +31,118 @@
             color: #666;
             font-style: italic;
         }
+        h2 {
+            margin-top: 30px;
+            text-align: left;
+            color: #333;
+        }
+        .file-section {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+        .file-upload {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        #file-input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #upload-button {
+            margin-left: 10px;
+            padding: 8px 15px;
+            background-color: #6a40bf;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #upload-button:hover {
+            background-color: #8250ea;
+        }
+        #upload-status {
+            margin-left: 10px;
+            color: #666;
+        }
+        .file-list {
+            margin-top: 20px;
+        }
+        .file-list h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        #files-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        #files-list li {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        #files-list li:last-child {
+            border-bottom: none;
+        }
+        .file-link {
+            color: #2196F3;
+            text-decoration: none;
+        }
+        .file-link:hover {
+            text-decoration: underline;
+        }
+        .file-info {
+            color: #666;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
+    <p class="status" id="status">connecting...</p>
     <h1>clippy wippy</h1>
-    <textarea id="shared-text" placeholder="type or paste your text here..."></textarea>
-    <p class="status" id="status">Connecting...</p>
+    <label for="shared-text"></label><textarea id="shared-text" placeholder="type or paste your text here..."></textarea>
+    <h1>filey wiley</h1>
+    <div class="file-section">
+        <div class="file-upload">
+            <input type="file" id="file-input">
+            <button id="upload-button">upload</button>
+            <div id="upload-status"></div>
+        </div>
+        <div class="file-list">
+            <h2>uploaded files</h2>
+            <ul id="files-list"></ul>
+        </div>
+    </div>
 
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         const socket = io();
         const textarea = document.getElementById('shared-text');
         const statusElement = document.getElementById('status');
+        const fileInput = document.getElementById('file-input');
+        const uploadButton = document.getElementById('upload-button');
+        const uploadStatus = document.getElementById('upload-status');
+        const filesList = document.getElementById('files-list');
 
         // When connected to the server
         socket.on('connect', () => {
-            statusElement.textContent = 'Connected';
-            
+            statusElement.textContent = 'connected';
+
             // Request the current text when connecting
             socket.emit('getText');
+
+            // Request the file list when connecting
+            socket.emit('getFileList');
         });
 
         // When disconnected from the server
         socket.on('disconnect', () => {
-            statusElement.textContent = 'Disconnected';
+            statusElement.textContent = 'disconnected';
         });
 
         // When receiving text from the server
@@ -68,6 +156,99 @@
         textarea.addEventListener('input', () => {
             socket.emit('updateText', textarea.value);
         });
+
+        // When receiving the file list from the server
+        socket.on('fileList', (files) => {
+            displayFiles(files);
+        });
+
+        // When a new file is uploaded by any client
+        socket.on('fileUploaded', (fileInfo) => {
+            // Request the updated file list
+            socket.emit('getFileList');
+        });
+
+        // Handle file upload
+        uploadButton.addEventListener('click', () => {
+            const file = fileInput.files[0];
+            if (!file) {
+                uploadStatus.textContent = 'please select a file';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            uploadStatus.textContent = 'uploading...';
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('upload failed');
+                }
+                return response.json();
+            })
+            .then(data => {
+                uploadStatus.textContent = 'upload successful';
+                fileInput.value = ''; // Clear the file input
+            })
+            .catch(error => {
+                uploadStatus.textContent = `Error: ${error.message}`;
+            });
+        });
+
+        // Display the list of files
+        function displayFiles(files) {
+            filesList.innerHTML = '';
+
+            if (files.length === 0 || !files) {
+                const li = document.createElement('li');
+                li.textContent = 'no files uploaded yet';
+                filesList.appendChild(li);
+                return;
+            }
+
+            // Sort files by date (newest first)
+            files.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            files.forEach(file => {
+                const li = document.createElement('li');
+
+                const link = document.createElement('a');
+                link.href = `/download/${file.name}`;
+                link.className = 'file-link';
+                link.textContent = file.originalName;
+                link.setAttribute('download', file.originalName);
+
+                const info = document.createElement('span');
+                info.className = 'file-info';
+
+                // Format file size
+                let fileSize = file.size;
+                let sizeUnit = 'B';
+                if (fileSize > 1024) {
+                    fileSize = (fileSize / 1024).toFixed(1);
+                    sizeUnit = 'KB';
+                }
+                if (fileSize > 1024) {
+                    fileSize = (fileSize / 1024).toFixed(1);
+                    sizeUnit = 'MB';
+                }
+
+                // Format date
+                const date = new Date(file.date);
+                const formattedDate = date.toLocaleString();
+
+                info.textContent = `${fileSize} ${sizeUnit} - ${formattedDate}`;
+
+                li.appendChild(link);
+                li.appendChild(info);
+                filesList.appendChild(li);
+            });
+        }
     </script>
 </body>
 </html>
