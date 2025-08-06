@@ -1,12 +1,10 @@
 # clippy-wippy
 
-Created with AI.
+A simple browser-based app that allows you to share text and files across different devices on the same network. 
 
-A simple browser-based text and file sharing application that allows users to share text and files across different devices on the same network. 
+Basically a cross-device clipboard (clippy-wippy). 
 
-Useful for times when you want to easily copy something to or from: PC, laptop, phone, tablet, or anything else with a browser.
-
-## Features
+## features
 
 - Multi-line text box for typing or pasting text
 - Real-time text synchronization across all connected devices
@@ -14,12 +12,12 @@ Useful for times when you want to easily copy something to or from: PC, laptop, 
 - Simple and responsive user interface
 - Works on any device with a web browser
 
-## Requirements
+## requirements
 
-- Node.js (v12 or higher recommended)
-- npm (comes with Node.js)
+- Node.js 
+- npm 
 
-## Installation
+## installation
 
 1. Clone this repository or download the source code
 2. Navigate to the project directory
@@ -29,7 +27,7 @@ Useful for times when you want to easily copy something to or from: PC, laptop, 
 npm install
 ```
 
-## Running the Application
+## running the app
 
 Start the server:
 
@@ -45,22 +43,22 @@ To find your local IP address:
 - On Windows: Open Command Prompt and type `ipconfig`
 - On macOS/Linux: Open Terminal and type `ifconfig` or `ip addr`
 
-## How It Works
+## how it works
 
-### Text Sharing
+### text sharing
 1. The server maintains the current state of the text
-2. When a user connects, they receive the current text
+2. When a user connects, they receive the current text under "clippy wippy"
 3. When any user updates the text, the changes are broadcast to all other connected users
 4. All connected users see the same text in real-time
 
-### File Sharing
+### file sharing
 1. Files are uploaded through the "filey wiley" section
 2. Uploaded files are stored on the server
 3. When a file is uploaded, all connected clients are notified
 4. All users can see and download the uploaded files
 5. Files are listed with their original name, size, and upload date
 
-## Technologies Used
+## technologies used
 
 - Express.js - Web server framework
 - Socket.IO - Real-time bidirectional event-based communication
