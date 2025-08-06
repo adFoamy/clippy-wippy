@@ -100,6 +100,18 @@
             font-size: 0.8em;
             margin-left: 10px;
         }
+        .delete-button {
+            margin-left: 10px;
+            padding: 8px 15px;
+            background-color: #ff3b30;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .delete-button:hover {
+            background-color: #e02f23;
+        }
     </style>
 </head>
 <body>
@@ -163,7 +175,7 @@
         });
 
         // When a new file is uploaded by any client
-        socket.on('fileUploaded', (fileInfo) => {
+        socket.on('fileUploaded', () => {
             // Request the updated file list
             socket.emit('getFileList');
         });
@@ -191,7 +203,7 @@
                 }
                 return response.json();
             })
-            .then(data => {
+            .then(() => {
                 uploadStatus.textContent = 'upload successful';
                 fileInput.value = ''; // Clear the file input
             })
@@ -199,6 +211,10 @@
                 uploadStatus.textContent = `Error: ${error.message}`;
             });
         });
+
+        function deleteFile(fileName) {
+            socket.emit('deleteFile', fileName);
+        }
 
         // Display the list of files
         function displayFiles(files) {
@@ -244,8 +260,16 @@
 
                 info.textContent = `${fileSize} ${sizeUnit} - ${formattedDate}`;
 
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.className = 'delete-button';
+                deleteButton.addEventListener('click', () => {
+                    deleteFile(file.name);
+                });
+
                 li.appendChild(link);
                 li.appendChild(info);
+                li.appendChild(deleteButton);
                 filesList.appendChild(li);
             });
         }

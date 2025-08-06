@@ -132,6 +132,15 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log('A user disconnected');
     });
+
+    socket.on('deleteFile', (fileName) => {
+        const filePath = path.join(uploadsDir, fileName);
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+            uploadedFiles = uploadedFiles.filter(file => file.name !== fileName);
+            io.emit('fileList', uploadedFiles);
+        }
+    });
 });
 
 // Start the server
