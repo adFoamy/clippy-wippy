@@ -59,7 +59,7 @@ function getUploadedFiles() {
     }
 }
 
-// Initialize uploaded files list
+// Initialise uploaded files list
 uploadedFiles = getUploadedFiles();
 
 // File upload route
@@ -84,7 +84,7 @@ app.post('/upload', upload.single('file'), (req, res) => {
     res.status(200).send(fileInfo);
 });
 
-// File download route (optional, as files are already accessible via static middleware)
+// File download route
 app.get('/download/:filename', (req, res) => {
     const filename = req.params.filename;
     const filePath = path.join(uploadsDir, filename);
@@ -133,6 +133,7 @@ io.on('connection', (socket) => {
         console.log('A user disconnected');
     });
 
+    // When a client requests to delete a file
     socket.on('deleteFile', (fileName) => {
         const filePath = path.join(uploadsDir, fileName);
         if (fs.existsSync(filePath)) {
